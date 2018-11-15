@@ -5,7 +5,7 @@
 #include <FS.h>
 #include <WebSocketsServer.h>
 
-#include "settings.h";
+#include "settings.h"
 
 ESP8266WiFiMulti wifiMulti;
 
@@ -22,6 +22,12 @@ void setup() {
   Serial.begin(115200);
   delay(10);
   Serial.println("");
+
+  startWiFi();
+  startSPIFFS();
+  startWebSocketServer();
+  startMDNS();
+  startWebServer();
 }
 
 bool rainbow = false;
@@ -29,10 +35,19 @@ unsigned long prevMillis = millis();
 int hue = 0;
 
 void loop() {
+  webSocket.loop();
+  server.handleClient();
 
+  if (rainbow) {
+    if (millis() > prevMillis + 32) {
+      if (++hue == 360) hue = 0;
+      setHue(hue);
+      prevMillis = millis();
+    }
+  }
 }
 
-void startWifi() {
+void startWiFi() {
   WiFi.softAP(ap_ssid, ap_pass);
   Serial.print("Access point \"");
   Serial.print(ap_ssid);
@@ -42,7 +57,7 @@ void startWifi() {
 
   Serial.print("Connecting ");
   while (wifiMulti.run() != WL_CONNECTED && WiFi.softAPgetStationNum() < 1) {
-    setRGB(0, 0, 511);
+    setRGB(0, 0, 255);
     delay(125);
     setRGB(0, 0, 127);
     delay(125);
@@ -78,7 +93,7 @@ void startSPIFFS() {
   }
 }
 
-void startWebSocket() {
+void startWebSocketServer() {
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
   Serial.println("WebSocket server started.");
@@ -210,4 +225,31 @@ String getContentType(String filename) {
   else if (filename.endsWith(".ico")) return "image/x-icon";
   else if (filename.endsWith(".gz")) return "application/x-gzip";
   return "text/plain";
+}
+
+void setHue(int hue) {
+  hue %= 360;
+  float radH = hue * 3.142 / 180;
+  float rf, gf, bf;
+
+  if (hue >= 0 && hue < 120) {
+    rf = cos(radH * 3 / 4);
+    gf = sin(radH * 3 / 4);
+    bf = 0;
+  } else if (hue >= 120 && hue < 240) {
+    radH -= 2.09439;
+    gf = cos(radH * 3 / 4);
+    bf = sin(radH * 3 / 4);
+    rf = 0;
+  } else if (hue >= 240 && hue < 360) {
+    radH -= 4.188787;
+    bf = cos(radH * 3 / 4);
+    rf = sin(radH * 3 / 4);
+    gf = 0;
+  }
+  int r = rf * rf * 1023;
+  int g = gf * gf * 1023;
+  int b = bf * bf * 1023;
+
+  setRGB(r, g, b);
 }
