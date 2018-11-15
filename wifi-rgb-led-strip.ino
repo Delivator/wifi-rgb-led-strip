@@ -30,7 +30,7 @@ void setup() {
   startWebServer();
 }
 
-bool rainbow = false;
+bool fade = false;
 unsigned long prevMillis = millis();
 int hue = 0;
 
@@ -38,7 +38,7 @@ void loop() {
   webSocket.loop();
   server.handleClient();
 
-  if (rainbow) {
+  if (fade) {
     if (millis() > prevMillis + 32) {
       if (++hue == 360) hue = 0;
       setHue(hue);
@@ -59,7 +59,7 @@ void startWiFi() {
   while (wifiMulti.run() != WL_CONNECTED && WiFi.softAPgetStationNum() < 1) {
     setRGB(0, 0, 255);
     delay(125);
-    setRGB(0, 0, 127);
+    setRGB(0, 0, 191);
     delay(125);
     Serial.print('.');
   }
@@ -72,7 +72,7 @@ void startWiFi() {
     Serial.println(WiFi.localIP());
     delay(1000);
     setRGB(0, 0, 0);
-    rainbow = true;
+    fade = true;
   } else {
     Serial.print("Station connected to ESP8266 AP");
   }
@@ -177,24 +177,27 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
     case WStype_CONNECTED: {
         IPAddress ip = webSocket.remoteIP(num);
         Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
-        rainbow = false;
+        fade = false;
       }
       break;
     case WStype_TEXT:
       Serial.printf("[%u] get Text: %s\n", num, payload);
       if (payload[0] == 'r') {
         int value = (uint32_t) strtol((const char *) &payload[1], NULL, 10);
+        fade = false;
         analogWrite(LED_R, value);
       } else if (payload[0] == 'g') {
         int value = (uint32_t) strtol((const char *) &payload[1], NULL, 10);
+        fade = false;
         analogWrite(LED_G, value);
       } else if (payload[0] == 'b') {
         int value = (uint32_t) strtol((const char *) &payload[1], NULL, 10);
+        fade = false;
         analogWrite(LED_B, value);
       } else if (payload[0] == 'R') {
-        rainbow = true;
+        fade = true;
       } else if (payload[0] == 'N') {
-        rainbow = false;
+        fade = false;
       }
       break;
   }

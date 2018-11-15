@@ -1,27 +1,47 @@
 <!DOCTYPE html>
 <html>
+
 <head>
-    <title>HTML Uploader</title>
-    <link href='main.css' rel='stylesheet' type='text/css'>
-    <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
-    <link rel="icon" type="image/png" sizes="144x144"  href="/favicon-144x144.png">
-    <link rel="icon" type="image/png" sizes="48x48" href="/favicon.ico">
-    <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#00878f">
-    <meta content='width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=0' name='viewport'>
+  <meta charset="utf-8" />
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>Update Website Files</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon-180x180.png">
+  <link rel="icon" type="image/png" sizes="144x144" href="/favicon-144x144.png">
+  <link rel="icon" type="image/png" sizes="48x48" href="/favicon.ico">
+  <link rel="manifest" href="/manifest.json">
+  <meta name="theme-color" content="#00878f">
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/css/materialize.min.css">
+  <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@3.5.3/dist/iro.min.js"></script>
 </head>
+
 <body>
-	<center>
-        <header>
-            <h1>HTML Uploader</h1>
-        </header>
-        <div>
-            <p style="text-align: left">Use this page to upload new files to the ESP8266.<br/>You can use compressed (deflated) files (files with a .gz extension) to save space and bandwidth.</p>
-            <form method="post" enctype="multipart/form-data" style="margin: 0px auto 8px auto" >
-                <input type="file" name="Choose file" accept=".gz,.html,.ico,.js,.css">
-                <input class="button" type="submit" value="Upload" name="submit">
-            </form>            
+  <div class="container">
+    <div class="row">
+      <div class="col xl6 offset-xl3 l8 offset-l2 s12 m10 offset-m1">
+        <div class="card">
+          <div class="card-content card-content blue darken-3 white-text">
+            <span class="card-title">Update Website Files</span>
+          </div>
+          <div class="card-content">
+            <blockquote>
+              Use this page to upload new files to the ESP8266.<br/>You can use
+              compressed (deflated) files (files with a .gz extension) to save space and bandwidth.
+            </blockquote>
+            <form method="post" enctype="multipart/form-data" style="margin: 0px auto 8px auto">
+              <input type="file" name="Choose file" accept=".gz,.html,.ico,.js,.css">
+              <button class="btn waves-effect waves-light" type="submit">
+                Upload <i class="material-icons right">cloud_upload</i>
+              </button>
+            </form>
+          </div>
         </div>
-	</center>
+      </div>
+    </div>
+  </div>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/materialize/1.0.0/js/materialize.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/@jaames/iro@3.5.3/dist/iro.min.js"></script>
 </body>
+
 </html>
