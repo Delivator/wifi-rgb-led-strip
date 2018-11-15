@@ -1,0 +1,11 @@
+// LED PINs
+#define LED_R 12
+#define LED_G 13
+#define LED_B 15
+
+// Wifi settings
+const char* wifi_ssid = "YOUR_WIFI_SSID";
+const char* wifi_pass = "YOUR_WIFI_PASSWORD";
+const char* ap_ssid = "ESP8266 LED STRIP";
+const char* ap_pass = "SUPER_SECURE_PASSWORD";
+const char* esp_name = "esp8266";
