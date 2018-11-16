@@ -30,8 +30,9 @@ void setup() {
   startWebServer();
 }
 
-bool fade = false;
 unsigned long prevMillis = millis();
+unsigned int animationDelay = 32;
+bool fade = false;
 int hue = 0;
 
 void loop() {
@@ -39,7 +40,7 @@ void loop() {
   server.handleClient();
 
   if (fade) {
-    if (millis() > prevMillis + 32) {
+    if (millis() > prevMillis + animationDelay) {
       if (++hue == 360) hue = 0;
       setHue(hue);
       prevMillis = millis();
@@ -57,9 +58,9 @@ void startWiFi() {
 
   Serial.print("Connecting ");
   while (wifiMulti.run() != WL_CONNECTED && WiFi.softAPgetStationNum() < 1) {
-    setRGB(0, 0, 255);
+    setRGB(0, 0, 511);
     delay(125);
-    setRGB(0, 0, 191);
+    setRGB(0, 0, 255);
     delay(125);
     Serial.print('.');
   }
@@ -177,23 +178,17 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
     case WStype_CONNECTED: {
         IPAddress ip = webSocket.remoteIP(num);
         Serial.printf("[%u] Connected from %d.%d.%d.%d url: %s\n", num, ip[0], ip[1], ip[2], ip[3], payload);
-        fade = false;
       }
       break;
     case WStype_TEXT:
       Serial.printf("[%u] get Text: %s\n", num, payload);
-      if (payload[0] == 'r') {
-        int value = (uint32_t) strtol((const char *) &payload[1], NULL, 10);
+      if (payload[0] == '#') {
+        uint32_t rgb = (uint32_t) strtol((const char *) &payload[1], NULL, 16);
+        int r = ((rgb >> 20) & 0x3FF);
+        int g = ((rgb >> 10) & 0x3FF);
+        int b = rgb & 0x3FF;
         fade = false;
-        analogWrite(LED_R, value);
-      } else if (payload[0] == 'g') {
-        int value = (uint32_t) strtol((const char *) &payload[1], NULL, 10);
-        fade = false;
-        analogWrite(LED_G, value);
-      } else if (payload[0] == 'b') {
-        int value = (uint32_t) strtol((const char *) &payload[1], NULL, 10);
-        fade = false;
-        analogWrite(LED_B, value);
+        setRGB(r, g, b);
       } else if (payload[0] == 'R') {
         fade = true;
       } else if (payload[0] == 'N') {

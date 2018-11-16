@@ -1,25 +1,42 @@
 const colorPicker = new iro.ColorPicker("#color-picker-container", {
-  color: "#00ff00"
+  color: {
+    h: Math.random() * 360,
+    s: 100,
+    v: 100
+  }
 });
 
-const connection = new WebSocket('ws://' + location.hostname + ':81/', ['arduino']);
+const connection = new WebSocket("ws://" + location.hostname + ":81/", ["arduino"]);
 
 const rSlider = document.getElementById("rSlider");
 const gSlider = document.getElementById("gSlider");
 const bSlider = document.getElementById("bSlider");
 
+let preventEvent = false;
 let enableFade = false;
 
-function sliderInput() {
-  enableFade = false;
-  let r = rSlider.value,
-    g = gSlider.value,
-    b = bSlider.value;
-  colorPicker.color.rgb = { r, g, b };
-  sendColors(r, g, b);
-}
+connection.onopen = function () {
+  connection.send("Connect " + new Date());
+};
+connection.onerror = function (error) {
+  console.log("WebSocket Error ", error);
+};
+connection.onmessage = function (e) {
+  console.log("Server: ", e.data);
+};
+connection.onclose = function () {
+  console.log("WebSocket connection closed");
+};
+
+rSlider.addEventListener("mousedown", () => { preventEvent = true; });
+rSlider.addEventListener("mouseup", () => { preventEvent = false; });
+gSlider.addEventListener("mousedown", () => { preventEvent = true; });
+gSlider.addEventListener("mouseup", () => { preventEvent = false; });
+bSlider.addEventListener("mousedown", () => { preventEvent = true; });
+bSlider.addEventListener("mouseup", () => { preventEvent = false; });
 
 colorPicker.on("color:change", (color) => {
+  if (preventEvent) return;
   enableFade = false;
   let r = color.rgb.r,
     g = color.rgb.g,
@@ -30,29 +47,26 @@ colorPicker.on("color:change", (color) => {
   sendColors(r, g, b);
 });
 
+function sliderInput() {
+  enableFade = false;
+  let r = rSlider.value,
+    g = gSlider.value,
+    b = bSlider.value;
+  colorPicker.color.rgb = { r, g, b };
+  sendColors(r, g, b);
+}
+
 function sendColors(r, g, b) {
   r = Math.floor((1023 / 255) * r);
   g = Math.floor((1023 / 255) * g);
   b = Math.floor((1023 / 255) * b);
+
+  let rgb = r << 20 | g << 10 | b;
+
   if (connection.readyState === connection.OPEN) {
-    connection.send("r" + r);
-    connection.send("g" + g);
-    connection.send("b" + b);
+    connection.send("#" + rgb.toString(16));
   }
 }
-
-connection.onopen = function () {
-  connection.send('Connect ' + new Date());
-};
-connection.onerror = function (error) {
-  console.log('WebSocket Error ', error);
-};
-connection.onmessage = function (e) {
-  console.log('Server: ', e.data);
-};
-connection.onclose = function () {
-  console.log('WebSocket connection closed');
-};
 
 function toggleFade() {
   enableFade = !enableFade;
@@ -62,30 +76,6 @@ function toggleFade() {
     connection.send("N");
   }
 }
-
-// function rainbowEffect() {
-//   rainbowEnable = !rainbowEnable;
-//   if (rainbowEnable) {
-//     connection.send("R");
-//     document.getElementById('rainbow').style.backgroundColor = '#00878F';
-//     rSlider.className = 'disabled';
-//     gSlider.className = 'disabled';
-//     bSlider.className = 'disabled';
-//     rSlider.disabled = true;
-//     gSlider.disabled = true;
-//     bSlider.disabled = true;
-//   } else {
-//     connection.send("N");
-//     document.getElementById("rainbow").style.backgroundColor = "#999";
-//     rSlider.className = 'enabled';
-//     gSlider.className = 'enabled';
-//     bSlider.className = 'enabled';
-//     rSlider.disabled = false;
-//     gSlider.disabled = false;
-//     bSlider.disabled = false;
-//     sendColors(0, 0, 0);
-//   }
-// }
 
 function intToHex(rgb) {
   let hex = Number(rgb).toString(16);
