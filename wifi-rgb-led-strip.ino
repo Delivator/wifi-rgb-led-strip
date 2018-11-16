@@ -189,6 +189,11 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
         int b = rgb & 0x3FF;
         fade = false;
         setRGB(r, g, b);
+      } else if (payload[0] == 'd') {
+        int delay = (uint32_t) strtol((const char *) &payload[1], NULL, 10);
+        if (delay > 500) delay = 500;
+        if (delay < 1) delay = 1;
+        animationDelay = delay;
       } else if (payload[0] == 'R') {
         fade = true;
       } else if (payload[0] == 'N') {
@@ -201,6 +206,12 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
 // ================================================== Helper Functions ==================================================
 
 void setRGB(int r, int g, int b) {
+  if (r > 1023) r = 1023;
+  if (r < 0) r = 0;
+  if (g > 1023) g = 1023;
+  if (g < 0) g = 0;
+  if (b > 1023) b = 1023;
+  if (b < 0) b = 0;
   analogWrite(LED_R, r);
   analogWrite(LED_G, g);
   analogWrite(LED_B, b);

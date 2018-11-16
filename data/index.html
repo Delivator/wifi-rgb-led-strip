@@ -20,24 +20,35 @@
 <body>
   <div class="container">
     <div class="row">
-      <div class="col xl6 offset-xl3 l8 offset-l2 s12 m10 offset-m1">
+      <div class="col xl6 l6 s12 m11 offset-m1">
         <div class="card">
           <div class="card-content card-content blue darken-3 white-text">
-            <span class="card-title">LED Control</span>
+            <span class="card-title">Color</span>
           </div>
           <div class="card-content">
             <p class="range-field">
-              <input type="range" id="rSlider" min="0" max="255" step="1" value="0" oninput="sliderInput()">
+              <input type="range" id="rSlider" min="0" max="255" step="1" value="0" oninput="rgbInput()">
             </p>
             <p class="range-field">
-              <input type="range" id="gSlider" min="0" max="255" step="1" value="0" oninput="sliderInput()">
+              <input type="range" id="gSlider" min="0" max="255" step="1" value="0" oninput="rgbInput()">
             </p>
             <p class="range-field">
-              <input type="range" id="bSlider" min="0" max="255" step="1" value="0" oninput="sliderInput()">
+              <input type="range" id="bSlider" min="0" max="255" step="1" value="0" oninput="rgbInput()">
             </p>
             <div id="color-picker-container"></div>
           </div>
-          <div class="card-action">
+        </div>
+      </div>
+      <div class="col xl6 l6 s12 m11 offset-m1">
+        <div class="card">
+          <div class="card-content card-content blue darken-3 white-text">
+            <span class="card-title">Animation</span>
+          </div>
+          <div class="card-content">
+            <h6>Animation delay (0: fast, 500: slow):</h6>
+            <p class="range-field">
+              <input type="range" id="delaySlider" min="0" max="500" step="1" value="32" oninput="delayInput()">
+            </p>
             <button class="waves-effect waves-light btn" id="btnFade" onclick="toggleFade()">Toggle RGB Fade</button>
           </div>
         </div>

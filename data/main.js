@@ -11,6 +11,7 @@ const connection = new WebSocket("ws://" + location.hostname + ":81/", ["arduino
 const rSlider = document.getElementById("rSlider");
 const gSlider = document.getElementById("gSlider");
 const bSlider = document.getElementById("bSlider");
+const delaySlider = document.getElementById("delaySlider");
 
 let preventEvent = false;
 let enableFade = false;
@@ -47,13 +48,20 @@ colorPicker.on("color:change", (color) => {
   sendColors(r, g, b);
 });
 
-function sliderInput() {
+function rgbInput() {
   enableFade = false;
   let r = rSlider.value,
     g = gSlider.value,
     b = bSlider.value;
   colorPicker.color.rgb = { r, g, b };
   sendColors(r, g, b);
+}
+
+function delayInput() {
+  let delay = delaySlider.value;
+  if (connection.readyState === connection.OPEN) {
+    connection.send("d" + delay);
+  }
 }
 
 function sendColors(r, g, b) {
