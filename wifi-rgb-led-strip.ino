@@ -32,6 +32,7 @@ void setup() {
 
 unsigned long prevMillis = millis();
 unsigned int animationDelay = 32;
+unsigned int rgb[3] = {0, 0, 0};
 bool fade = false;
 int hue = 0;
 
@@ -188,11 +189,14 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
         int g = ((rgb >> 10) & 0x3FF);
         int b = rgb & 0x3FF;
         fade = false;
+        // rgb[0] = r;
+        // rgb[1] = g;
+        // rgb[2] = b;
         setRGB(r, g, b);
       } else if (payload[0] == 'd') {
         int delay = (uint32_t) strtol((const char *) &payload[1], NULL, 10);
         if (delay > 500) delay = 500;
-        if (delay < 1) delay = 1;
+        if (delay < 0) delay = 0;
         animationDelay = delay;
       } else if (payload[0] == 'R') {
         fade = true;
@@ -212,6 +216,7 @@ void setRGB(int r, int g, int b) {
   if (g < 0) g = 0;
   if (b > 1023) b = 1023;
   if (b < 0) b = 0;
+  
   analogWrite(LED_R, r);
   analogWrite(LED_G, g);
   analogWrite(LED_B, b);
@@ -230,8 +235,12 @@ String formatBytes(size_t bytes) {
 String getContentType(String filename) {
   if (filename.endsWith(".html")) return "text/html";
   else if (filename.endsWith(".css")) return "text/css";
-  else if (filename.endsWith(".js")) return "application/javascript";
   else if (filename.endsWith(".ico")) return "image/x-icon";
+  else if (filename.endsWith(".png")) return "image/png";
+  else if (filename.endsWith(".svg")) return "image/svg+xml";
+  else if (filename.endsWith(".webmanifest")) return "application/json";
+  else if (filename.endsWith(".xml")) return "application/xml";
+  else if (filename.endsWith(".js")) return "application/javascript";
   else if (filename.endsWith(".gz")) return "application/x-gzip";
   return "text/plain";
 }
