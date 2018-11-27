@@ -50,7 +50,7 @@ void loop() {
 }
 
 void startWiFi() {
-  WiFi.softAP(ap_ssid, ap_pass);
+  WiFi.softAP(ap_ssid, ap_pass, 1, true);
   Serial.print("Access point \"");
   Serial.print(ap_ssid);
   Serial.println("\" started\n");
