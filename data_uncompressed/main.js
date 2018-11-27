@@ -1,6 +1,6 @@
 const colorPicker = new iro.ColorPicker("#color-picker-container", {
   color: {
-    h: Math.random() * 360,
+    h: Math.floor(Math.random() * 360),
     s: 100,
     v: 100
   }
