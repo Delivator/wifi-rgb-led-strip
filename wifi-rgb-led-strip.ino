@@ -14,6 +14,12 @@ WebSocketsServer webSocket(81);
 
 File fsUploadFile;
 
+unsigned long prevMillis = millis();
+unsigned int animationDelay = 32;
+int rgb[] = {0, 0, 0};
+bool fade = false;
+int hue = 0;
+
 void setup() {
   pinMode(LED_R, OUTPUT);
   pinMode(LED_G, OUTPUT);
@@ -29,12 +35,6 @@ void setup() {
   startMDNS();
   startWebServer();
 }
-
-unsigned long prevMillis = millis();
-unsigned int animationDelay = 32;
-unsigned int rgb[3] = {0, 0, 0};
-bool fade = false;
-int hue = 0;
 
 void loop() {
   webSocket.loop();
@@ -184,14 +184,14 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
     case WStype_TEXT:
       Serial.printf("[%u] get Text: %s\n", num, payload);
       if (payload[0] == '#') {
-        uint32_t rgb = (uint32_t) strtol((const char *) &payload[1], NULL, 16);
-        int r = ((rgb >> 20) & 0x3FF);
-        int g = ((rgb >> 10) & 0x3FF);
-        int b = rgb & 0x3FF;
+        uint32_t rgbdata = (uint32_t) strtol((const char *) &payload[1], NULL, 16);
+        int r = ((rgbdata >> 20) & 0x3FF);
+        int g = ((rgbdata >> 10) & 0x3FF);
+        int b = rgbdata & 0x3FF;
         fade = false;
-        // rgb[0] = r;
-        // rgb[1] = g;
-        // rgb[2] = b;
+        rgb[0] = r;
+        rgb[1] = g;
+        rgb[2] = b;
         setRGB(r, g, b);
       } else if (payload[0] == 'd') {
         int delay = (uint32_t) strtol((const char *) &payload[1], NULL, 10);

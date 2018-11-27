@@ -6,13 +6,16 @@ compressable_files = ("html", "css", "js", "ico")
 indir = "./data_uncompressed"
 outdir = "./data"
 
+# When ./data exsits, delte the folder and all files in it
 if os.path.exists(outdir):
   shutil.rmtree(outdir)
   print('Removed ./data')
+# Create ./data if it doesn't exsit
 if not os.path.exists(outdir):
   os.makedirs(outdir)
   print('Created ./data')
 
+# Loop through all files in ./data_uncompressed
 for root, dirs, files in os.walk(indir):
   for filename in files:
     compressable = filename.endswith(compressable_files)
