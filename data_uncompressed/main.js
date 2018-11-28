@@ -14,7 +14,6 @@ const bSlider = document.getElementById("bSlider");
 const delaySlider = document.getElementById("delaySlider");
 
 let preventEvent = false;
-let enableFade = false;
 
 connection.onopen = function () {
   connection.send("Connect " + new Date());
@@ -38,7 +37,6 @@ bSlider.addEventListener("mouseup", () => { preventEvent = false; });
 
 colorPicker.on("color:change", (color) => {
   if (preventEvent) return;
-  enableFade = false;
   let r = color.rgb.r,
     g = color.rgb.g,
     b = color.rgb.b;
@@ -49,7 +47,6 @@ colorPicker.on("color:change", (color) => {
 });
 
 function rgbInput() {
-  enableFade = false;
   let r = rSlider.value,
     g = gSlider.value,
     b = bSlider.value;
@@ -59,9 +56,7 @@ function rgbInput() {
 
 function delayInput() {
   let delay = delaySlider.value;
-  if (connection.readyState === connection.OPEN) {
-    connection.send("d" + delay);
-  }
+  if (connection.readyState === connection.OPEN) connection.send("d" + delay);
 }
 
 function sendColors(r, g, b) {
@@ -71,18 +66,23 @@ function sendColors(r, g, b) {
 
   let rgb = r << 20 | g << 10 | b;
 
-  if (connection.readyState === connection.OPEN) {
-    connection.send("#" + rgb.toString(16));
-  }
+  if (connection.readyState === connection.OPEN) connection.send("#" + rgb.toString(16));
 }
 
-function toggleFade() {
-  enableFade = !enableFade;
-  if (enableFade) {
-    connection.send("R");
-  } else {
-    connection.send("N");
-  }
+function animationOff() {
+  if (connection.readyState === connection.OPEN) connection.send("a0");
+}
+
+function fade() {
+  if (connection.readyState === connection.OPEN) connection.send("a1");
+}
+
+function blink() {
+  if (connection.readyState === connection.OPEN) connection.send("a2");
+}
+
+function breathing() {
+  if (connection.readyState === connection.OPEN) connection.send("a3");
 }
 
 function intToHex(rgb) {

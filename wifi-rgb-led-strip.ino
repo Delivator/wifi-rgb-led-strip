@@ -14,11 +14,16 @@ WebSocketsServer webSocket(81);
 
 File fsUploadFile;
 
+const float pi = 3.14159265359;
+
 unsigned long prevMillis = millis();
 unsigned int animationDelay = 32;
+unsigned short currentAnimation = 0;
 int rgb[] = {0, 0, 0};
-bool fade = false;
 int hue = 0;
+float brightnessY = 0.0;
+float brightnessTime = 0.0;
+bool blink = true;
 
 void setup() {
   pinMode(LED_R, OUTPUT);
@@ -39,14 +44,7 @@ void setup() {
 void loop() {
   webSocket.loop();
   server.handleClient();
-
-  if (fade) {
-    if (millis() > prevMillis + animationDelay) {
-      if (++hue == 360) hue = 0;
-      setHue(hue);
-      prevMillis = millis();
-    }
-  }
+  animation();
 }
 
 void startWiFi() {
@@ -74,7 +72,7 @@ void startWiFi() {
     Serial.println(WiFi.localIP());
     delay(1000);
     setRGB(0, 0, 0);
-    fade = true;
+    currentAnimation = 1;
   } else {
     Serial.print("Station connected to ESP8266 AP");
   }
@@ -188,7 +186,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
         int r = ((rgbdata >> 20) & 0x3FF);
         int g = ((rgbdata >> 10) & 0x3FF);
         int b = rgbdata & 0x3FF;
-        fade = false;
+        if (currentAnimation == 1) currentAnimation = 0;
         rgb[0] = r;
         rgb[1] = g;
         rgb[2] = b;
@@ -198,16 +196,56 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
         if (delay > 500) delay = 500;
         if (delay < 0) delay = 0;
         animationDelay = delay;
-      } else if (payload[0] == 'R') {
-        fade = true;
-      } else if (payload[0] == 'N') {
-        fade = false;
+      } else if (payload[0] == 'a') {
+        unsigned short newAnimation = (unsigned short) strtol((const char *) &payload[1], NULL, 10);
+        currentAnimation = newAnimation;
       }
       break;
   }
 }
 
 // ================================================== Helper Functions ==================================================
+
+void animation() {
+  switch (currentAnimation) {
+    case 0: // no animation
+      break;
+    case 1: // fade animation
+      if (millis() > prevMillis + animationDelay) {
+        if (++hue == 360) hue = 0;
+        setHue(hue);
+        prevMillis = millis();
+      }
+      break;
+    case 2: // blink animation
+      if (millis() > prevMillis + animationDelay) {
+        if (blink) {
+          setRGB(rgb[0], rgb[1], rgb[2]);
+        } else {
+          setRGB(0, 0, 0);
+        }
+        blink = !blink;
+        prevMillis = millis();
+      }
+      break;
+    case 3: // breathing animation
+      if (millis() > prevMillis + animationDelay) {
+        int newRgb[] = {0, 0, 0};
+        if (brightnessTime >= pi*2) brightnessTime = 0.0;
+        brightnessTime += 0.05;
+        brightnessY = -cos(brightnessTime) + 1;
+        float brightnessPercent = brightnessY / 2;
+        newRgb[0] = rgb[0] * brightnessPercent;
+        newRgb[1] = rgb[1] * brightnessPercent;
+        newRgb[2] = rgb[2] * brightnessPercent;
+        setRGB(newRgb[0], newRgb[1], newRgb[2]);
+        prevMillis = millis();
+      }
+      break;
+    default:
+      break;
+  }
+}
 
 void setRGB(int r, int g, int b) {
   if (r > 1023) r = 1023;

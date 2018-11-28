@@ -9,3 +9,7 @@ input[type=range]#gSlider::-webkit-slider-thumb {
 input[type=range]#bSlider::-webkit-slider-thumb {
     background: #2196f3 !important;
 }
+
+.card-content button {
+    margin: 0.3em;
+}
