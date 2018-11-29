@@ -13,3 +13,7 @@ input[type=range]#bSlider::-webkit-slider-thumb {
 .card-content button {
     margin: 0.3em;
 }
+
+input[type=range] {
+    border: 1px solid #616161 !important;
+}

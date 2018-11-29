@@ -78,6 +78,8 @@ function fade() {
 }
 
 function blink() {
+  delaySlider.value = 500;
+  if (connection.readyState === connection.OPEN) connection.send("d" + 500);
   if (connection.readyState === connection.OPEN) connection.send("a2");
 }
 

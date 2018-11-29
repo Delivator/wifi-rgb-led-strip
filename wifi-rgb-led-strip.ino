@@ -57,10 +57,10 @@ void startWiFi() {
 
   Serial.print("Connecting ");
   while (wifiMulti.run() != WL_CONNECTED && WiFi.softAPgetStationNum() < 1) {
-    setRGB(0, 0, 511);
     delay(125);
-    setRGB(0, 0, 255);
+    setRGB(0, 85, 255);
     delay(125);
+    setRGB(0, 42, 128);
     Serial.print('.');
   }
   Serial.print("");
@@ -218,7 +218,7 @@ void animation() {
       }
       break;
     case 2: // blink animation
-      if (millis() > prevMillis + animationDelay) {
+      if (millis() > prevMillis + animationDelay * 2) {
         if (blink) {
           setRGB(rgb[0], rgb[1], rgb[2]);
         } else {
@@ -232,7 +232,7 @@ void animation() {
       if (millis() > prevMillis + animationDelay) {
         int newRgb[] = {0, 0, 0};
         if (brightnessTime >= pi*2) brightnessTime = 0.0;
-        brightnessTime += 0.05;
+        brightnessTime += 0.03;
         brightnessY = -cos(brightnessTime) + 1;
         float brightnessPercent = brightnessY / 2;
         newRgb[0] = rgb[0] * brightnessPercent;
