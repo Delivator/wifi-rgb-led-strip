@@ -13,6 +13,6 @@
 [Python 3.7.1](https://www.python.org/downloads/release/python-371/) If you want to use the gzip script for the website data
 
 ## Screenshots
-![screenshot](https://i.imgur.com/q6yKqKk.png "Screenshot 1")
+![screenshot](https://i.imgur.com/6loIDmD.png "Screenshot 1")
 
 Thanks to [@tttapa](https://github.com/tttapa) for his beginners guide (https://tttapa.github.io/ESP8266/Chap14%20-%20WebSocket.html)
