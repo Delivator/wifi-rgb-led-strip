@@ -73,11 +73,11 @@ function animationOff() {
   if (connection.readyState === connection.OPEN) connection.send("a0");
 }
 
-function fade() {
+function fading() {
   if (connection.readyState === connection.OPEN) connection.send("a1");
 }
 
-function blink() {
+function blinking() {
   delaySlider.value = 500;
   if (connection.readyState === connection.OPEN) connection.send("d" + 500);
   if (connection.readyState === connection.OPEN) connection.send("a2");
@@ -85,6 +85,10 @@ function blink() {
 
 function breathing() {
   if (connection.readyState === connection.OPEN) connection.send("a3");
+}
+
+function fire() {
+  if (connection.readyState === connection.OPEN) connection.send("a4");
 }
 
 function intToHex(rgb) {

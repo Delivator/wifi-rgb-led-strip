@@ -23,6 +23,7 @@ int rgb[] = {0, 0, 0};
 int hue = 0;
 float brightnessY = 0.0;
 float brightnessTime = 0.0;
+float brightnessTimeAdd = 0.03;
 bool blink = true;
 
 void setup() {
@@ -39,6 +40,7 @@ void setup() {
   startWebSocketServer();
   startMDNS();
   startWebServer();
+  randomSeed(analogRead(0));
 }
 
 void loop() {
@@ -186,7 +188,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
         int r = ((rgbdata >> 20) & 0x3FF);
         int g = ((rgbdata >> 10) & 0x3FF);
         int b = rgbdata & 0x3FF;
-        if (currentAnimation == 1) currentAnimation = 0;
+        if (currentAnimation == 1 || currentAnimation == 4) currentAnimation = 0;
         rgb[0] = r;
         rgb[1] = g;
         rgb[2] = b;
@@ -199,6 +201,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
       } else if (payload[0] == 'a') {
         unsigned short newAnimation = (unsigned short) strtol((const char *) &payload[1], NULL, 10);
         currentAnimation = newAnimation;
+        if (newAnimation == 4) hue = 0;
       }
       break;
   }
@@ -239,6 +242,21 @@ void animation() {
         newRgb[1] = rgb[1] * brightnessPercent;
         newRgb[2] = rgb[2] * brightnessPercent;
         setRGB(newRgb[0], newRgb[1], newRgb[2]);
+        prevMillis = millis();
+      }
+      break;
+    case 4: // fire animation
+      if (millis() > prevMillis + map(animationDelay, 0, 500, 0, 15)) {
+        unsigned int newHue = 0;
+        if (brightnessTime >= pi*2) {
+          brightnessTime = 0.0;
+          brightnessTimeAdd = random(1, 10) / 100.0;
+        }
+        brightnessTime += brightnessTimeAdd;
+        brightnessY = -cos(brightnessTime) + 1;
+        float brightnessPercent = brightnessY / 2;
+        newHue = 20 * brightnessPercent;
+        setHue(newHue);
         prevMillis = millis();
       }
       break;
