@@ -255,7 +255,7 @@ void animation() {
         brightnessTime += brightnessTimeAdd;
         brightnessY = -cos(brightnessTime) + 1;
         float brightnessPercent = brightnessY / 2;
-        newHue = 20 * brightnessPercent;
+        newHue = 18 * brightnessPercent;
         setHue(newHue);
         prevMillis = millis();
       }
