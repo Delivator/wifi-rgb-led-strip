@@ -2,7 +2,7 @@ import os
 import gzip
 import shutil
 
-compressable_files = ("html", "css", "js", "ico", "svg", "map", "json")
+compressable_files = ("html", "css", "js", "ico", "svg", "map", "json", "txt")
 indir = "./webfiles/dist"
 outdir = "./data"
 
