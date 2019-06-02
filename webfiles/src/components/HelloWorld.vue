@@ -6,7 +6,7 @@
     >
       <v-flex xs12>
         <v-img
-          :src="require('../assets/logo.svg')"
+          src="https://rawcdn.githack.com/Delivator/wifi-rgb-led-strip/2fd3569a46e48f6ca75913a7240d4614ccf17bd2/webfiles/src/assets/logo.svg"
           class="my-3"
           contain
           height="200"
