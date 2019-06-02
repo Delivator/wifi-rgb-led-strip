@@ -5,3 +5,15 @@ include/settings.h
 .pio
 .pioenvs
 .piolibdeps
+
+webfiles/node_modules/
+webfiles/dist/
+
+# local env files
+.env.local
+.env.*.local
+
+# Log files
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
