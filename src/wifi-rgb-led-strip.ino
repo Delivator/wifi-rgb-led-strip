@@ -50,7 +50,7 @@ void loop() {
 }
 
 void startWiFi() {
-  WiFi.softAP(ap_ssid, ap_pass, 1, true);
+  WiFi.softAP(ap_ssid, ap_pass, 1, ap_hidden);
   Serial.print("Access point \"");
   Serial.print(ap_ssid);
   Serial.println("\" started\n");
@@ -188,7 +188,7 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
         int r = ((rgbdata >> 20) & 0x3FF);
         int g = ((rgbdata >> 10) & 0x3FF);
         int b = rgbdata & 0x3FF;
-        if (currentAnimation == 1 || currentAnimation == 4) currentAnimation = 0;
+        if (currentAnimation == 1 || currentAnimation == 4 || r + g + b == 0) currentAnimation = 0;
         rgb[0] = r;
         rgb[1] = g;
         rgb[2] = b;

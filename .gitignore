@@ -1,4 +1,7 @@
 .vscode/
-build/
+src/build/
 data/
-settings.h
+include/settings.h
+.pio
+.pioenvs
+.piolibdeps

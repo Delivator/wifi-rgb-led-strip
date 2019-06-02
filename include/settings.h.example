@@ -8,4 +8,5 @@ const char* wifi_ssid = "YOUR_WIFI_SSID";
 const char* wifi_pass = "YOUR_WIFI_PASSWORD";
 const char* ap_ssid = "ESP8266 LED STRIP";
 const char* ap_pass = "SUPER_SECURE_PASSWORD";
+const bool ap_hidden = true;
 const char* esp_name = "esp8266";
