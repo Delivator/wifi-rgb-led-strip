@@ -1,18 +1,13 @@
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
-#include <ESP8266WebServer.h>
 #include <ESP8266mDNS.h>
-#include <FS.h>
 #include <WebSocketsServer.h>
 
 #include "settings.h"
 
 ESP8266WiFiMulti wifiMulti;
 
-ESP8266WebServer server(80);
 WebSocketsServer webSocket(81);
-
-File fsUploadFile;
 
 const float pi = 3.14159265359;
 
@@ -36,16 +31,13 @@ void setup() {
   Serial.println("");
 
   startWiFi();
-  startSPIFFS();
   startWebSocketServer();
   startMDNS();
-  startWebServer();
   randomSeed(analogRead(0));
 }
 
 void loop() {
   webSocket.loop();
-  server.handleClient();
   animation();
 }
 
@@ -81,20 +73,6 @@ void startWiFi() {
   Serial.println();
 }
 
-void startSPIFFS() {
-  SPIFFS.begin();
-  Serial.println("SPIFFS started. Contents:");
-  {
-    Dir dir = SPIFFS.openDir("/");
-    while (dir.next()) {
-      String fileName = dir.fileName();
-      size_t fileSize = dir.fileSize();
-      Serial.printf("\tFS File: %s, size: %s\n", fileName.c_str(), formatBytes(fileSize).c_str());
-    }
-    Serial.println();
-  }
-}
-
 void startWebSocketServer() {
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
@@ -106,69 +84,6 @@ void startMDNS() {
   Serial.print("mDNS responder started: http://");
   Serial.print(esp_name);
   Serial.println(".local/");
-}
-
-void startWebServer() {
-  server.on("/edit.html", HTTP_POST, []() {
-    server.send(200, "text/plain", "");
-  }, handleFileUpload);
-
-  server.onNotFound(handleNotFound);
-
-  server.begin();
-  Serial.println("HTTP server started.");
-}
-
-void handleNotFound() {
-  if (!handleFileRead(server.uri())) {
-    server.send(404, "text/plain", "404: File not found");
-  }
-}
-
-bool handleFileRead(String path) {
-  Serial.println("handleFileRead: " + path);
-  if (path.endsWith("/")) path += "index.html";
-  String contentType = getContentType(path);
-  String pathWithGz = path + ".gz";
-  if (SPIFFS.exists(pathWithGz) || SPIFFS.exists(path)) {
-    if (SPIFFS.exists(pathWithGz)) path += ".gz";
-    File file = SPIFFS.open(path, "r");
-    size_t sent = server.streamFile(file, contentType);
-    file.close();
-    Serial.println(String("\tSent file: ") + path);
-    return true;
-  }
-  Serial.println(String("\tFile not found: ") + path);
-  return false;
-}
-
-void handleFileUpload() {
-  HTTPUpload& upload = server.upload();
-  String path;
-  if (upload.status == UPLOAD_FILE_START) {
-    path = upload.filename;
-    if (!path.startsWith("/")) path = "/" + path;
-    if (!path.endsWith(".gz")) {
-      String pathWithGz = path + ".gz";
-      if (SPIFFS.exists(pathWithGz)) SPIFFS.remove(pathWithGz);
-    }
-    Serial.print("handleFileUpload file: ");
-    Serial.println(path);
-    fsUploadFile = SPIFFS.open(path, "w");
-    path = String();
-  } else if (upload.status == UPLOAD_FILE_WRITE) {
-    if (fsUploadFile) fsUploadFile.write(upload.buf, upload.currentSize);
-  } else if (upload.status == UPLOAD_FILE_END) {
-    if (fsUploadFile) {
-      fsUploadFile.close();
-      Serial.print("handleFileUpload size: ");
-      Serial.println(upload.totalSize);
-      server.sendHeader("Location", "/success.html");
-      server.send(303);
-    } else {
-      server.send(500, "text/plain", "500: Couldn't create file");
-    }
-  }
 }
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght) {
@@ -286,19 +201,6 @@ String formatBytes(size_t bytes) {
   } else if (bytes < (1024 * 1024 * 1024)) {
     return String(bytes / 1024.0 / 1024.0) + "MiB";
   }
-}
-
-String getContentType(String filename) {
-  if (filename.endsWith(".html")) return "text/html";
-  else if (filename.endsWith(".css")) return "text/css";
-  else if (filename.endsWith(".ico")) return "image/x-icon";
-  else if (filename.endsWith(".png")) return "image/png";
-  else if (filename.endsWith(".svg")) return "image/svg+xml";
-  else if (filename.endsWith(".webmanifest")) return "application/json";
-  else if (filename.endsWith(".xml")) return "application/xml";
-  else if (filename.endsWith(".js")) return "application/javascript";
-  else if (filename.endsWith(".gz")) return "application/x-gzip";
-  return "text/plain";
 }
 
 void setHue(int hue) {
