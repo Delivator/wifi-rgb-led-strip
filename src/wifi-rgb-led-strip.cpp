@@ -1,6 +1,6 @@
+#include <Arduino.h>
 #include <ESP8266WiFi.h>
 #include <ESP8266WiFiMulti.h>
-#include <ESP8266mDNS.h>
 #include <WebSocketsServer.h>
 
 #include "settings.h"
@@ -21,6 +21,14 @@ float brightnessTime = 0.0;
 float brightnessTimeAdd = 0.03;
 bool blink = true;
 
+void startWiFi();
+void startWebSocketServer();
+void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght);
+void animation();
+void setRGB(int r, int g, int b);
+void setHue(int hue);
+String rgbToHex(int color[]);
+
 void setup() {
   pinMode(LED_R, OUTPUT);
   pinMode(LED_G, OUTPUT);
@@ -32,7 +40,6 @@ void setup() {
 
   startWiFi();
   startWebSocketServer();
-  startMDNS();
   randomSeed(analogRead(0));
 }
 
@@ -42,6 +49,7 @@ void loop() {
 }
 
 void startWiFi() {
+  WiFi.hostname(esp_name);
   WiFi.softAP(ap_ssid, ap_pass, 1, ap_hidden);
   Serial.print("Access point \"");
   Serial.print(ap_ssid);
@@ -66,7 +74,7 @@ void startWiFi() {
     Serial.println(WiFi.localIP());
     delay(1000);
     setRGB(0, 0, 0);
-    currentAnimation = 1;
+    currentAnimation = 2;
   } else {
     Serial.print("Station connected to ESP8266 AP");
   }
@@ -77,13 +85,6 @@ void startWebSocketServer() {
   webSocket.begin();
   webSocket.onEvent(webSocketEvent);
   Serial.println("WebSocket server started.");
-}
-
-void startMDNS() {
-  MDNS.begin(esp_name);
-  Serial.print("mDNS responder started: http://");
-  Serial.print(esp_name);
-  Serial.println(".local/");
 }
 
 void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght) {
@@ -98,12 +99,17 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
       break;
     case WStype_TEXT:
       Serial.printf("[%u] get Text: %s\n", num, payload);
-      if (payload[0] == '#') {
-        uint32_t rgbdata = (uint32_t) strtol((const char *) &payload[1], NULL, 16);
-        int r = ((rgbdata >> 20) & 0x3FF);
-        int g = ((rgbdata >> 10) & 0x3FF);
-        int b = rgbdata & 0x3FF;
-        if (currentAnimation == 1 || currentAnimation == 4 || r + g + b == 0) currentAnimation = 0;
+      if (payload[0] == '0') { // off
+        currentAnimation = 0;
+        setRGB(0, 0, 0);
+      } else if (payload[0] == 'g') { // get status
+        webSocket.sendTXT(num, "" + rgbToHex(rgb) + "," + String(currentAnimation));
+      } else if (payload[0] == '#') {
+        uint32_t color = (uint32_t) strtol((const char *) &payload[1], NULL, 16);
+        int r = map(((color >> 16) & 0xFF), 0, 255, 0, 1023);
+        int g = map(((color >> 8) & 0xFF), 0, 255, 0, 1023);
+        int b = map(((color >> 0) & 0xFF), 0, 255, 0, 1023);
+        if (currentAnimation <= 2 || currentAnimation == 5) currentAnimation = 1;
         rgb[0] = r;
         rgb[1] = g;
         rgb[2] = b;
@@ -126,16 +132,17 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
 
 void animation() {
   switch (currentAnimation) {
-    case 0: // no animation
+    case 0: // off
+    case 1: // no animation
       break;
-    case 1: // fade animation
+    case 2: // fade animation
       if (millis() > prevMillis + animationDelay) {
         if (++hue == 360) hue = 0;
         setHue(hue);
         prevMillis = millis();
       }
       break;
-    case 2: // blink animation
+    case 3: // blink animation
       if (millis() > prevMillis + animationDelay * 2) {
         if (blink) {
           setRGB(rgb[0], rgb[1], rgb[2]);
@@ -146,7 +153,7 @@ void animation() {
         prevMillis = millis();
       }
       break;
-    case 3: // breathing animation
+    case 4: // breathing animation
       if (millis() > prevMillis + animationDelay) {
         int newRgb[] = {0, 0, 0};
         if (brightnessTime >= pi*2) brightnessTime = 0.0;
@@ -160,7 +167,7 @@ void animation() {
         prevMillis = millis();
       }
       break;
-    case 4: // fire animation
+    case 5: // fire animation
       if (millis() > prevMillis + map(animationDelay, 0, 500, 0, 15)) {
         unsigned int newHue = 0;
         if (brightnessTime >= pi*2) {
@@ -193,16 +200,6 @@ void setRGB(int r, int g, int b) {
   analogWrite(LED_B, b);
 }
 
-String formatBytes(size_t bytes) {
-  if (bytes < 1024) {
-    return String(bytes) + "B";
-  } else if (bytes < (1024 * 1024)) {
-    return String(bytes / 1024.0) + "KiB";
-  } else if (bytes < (1024 * 1024 * 1024)) {
-    return String(bytes / 1024.0 / 1024.0) + "MiB";
-  }
-}
-
 void setHue(int hue) {
   hue %= 360;
   float radH = hue * 3.142 / 180;
@@ -228,4 +225,11 @@ void setHue(int hue) {
   int b = bf * bf * 1023;
 
   setRGB(r, g, b);
+}
+
+String rgbToHex(int color[]) {
+  return String(map(color[0], 0, 1023, 0, 255)) + ","
+       + String(map(color[1], 0, 1023, 0, 255)) + ","
+       + String(map(color[2], 0, 1023, 0, 255)) + ","
+       + String(animationDelay);
 }
