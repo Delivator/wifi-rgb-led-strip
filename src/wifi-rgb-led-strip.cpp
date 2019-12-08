@@ -14,7 +14,7 @@ const float pi = 3.14159265359;
 unsigned long prevMillis = millis();
 unsigned int animationDelay = 32;
 unsigned short currentAnimation = 0;
-int rgb[] = {0, 0, 0};
+int rgb[] = {1023, 1023, 1023};
 int hue = 0;
 float brightnessY = 0.0;
 float brightnessTime = 0.0;
@@ -103,7 +103,8 @@ void webSocketEvent(uint8_t num, WStype_t type, uint8_t * payload, size_t lenght
         currentAnimation = 0;
         setRGB(0, 0, 0);
       } else if (payload[0] == 'g') { // get status
-        webSocket.sendTXT(num, "" + rgbToHex(rgb) + "," + String(currentAnimation));
+        webSocket.sendTXT(num, "" + rgbToHex(rgb) + "," + String(currentAnimation)  + ","
+                                                        + String(animationDelay));
       } else if (payload[0] == '#') {
         uint32_t color = (uint32_t) strtol((const char *) &payload[1], NULL, 16);
         int r = map(((color >> 16) & 0xFF), 0, 255, 0, 1023);
@@ -230,6 +231,5 @@ void setHue(int hue) {
 String rgbToHex(int color[]) {
   return String(map(color[0], 0, 1023, 0, 255)) + ","
        + String(map(color[1], 0, 1023, 0, 255)) + ","
-       + String(map(color[2], 0, 1023, 0, 255)) + ","
-       + String(animationDelay);
+       + String(map(color[2], 0, 1023, 0, 255));
 }
