@@ -2,6 +2,7 @@
 src/build/
 data/
 include/settings.h
+include/settings.*.h
 .pio
 .pioenvs
 .piolibdeps
